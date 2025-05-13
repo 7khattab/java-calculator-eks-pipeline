@@ -24,9 +24,11 @@ jobs:
         cache: 'maven'
 
     - name: Run Unit Tests
+      working-directory: ./my-app
       run: mvn test
 
     - name: Run Integration Tests and Package
+      working-directory: ./my-app
       run: mvn clean package
 
     - name: Set up Docker Buildx
@@ -41,7 +43,7 @@ jobs:
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v4
       with:
-        context: .
+        context: ./my-app
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-java-app:latest
 
@@ -58,6 +60,5 @@ jobs:
 
     - name: Deploy to Kubernetes
       run: |
-        kubectl apply -f ./k8s/deployment.yaml
-        kubectl apply -f ./k8s/service.yaml
-
+        kubectl apply -f ./my-app/k8s/deployment.yaml
+        kubectl apply -f ./my-app/k8s/service.yaml 
