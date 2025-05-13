@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: calculator
-        image: ${DOCKERHUB_USERNAME}/my-java-app:${GITHUB_SHA}
+        image: ${{ secrets.DOCKERHUB_USERNAME }}/my-java-app:latest
         ports:
         - containerPort: 8080
         
