@@ -54,9 +54,9 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-2
 
-    - name: Update kubeconfig for EKS
+    - name: Update kubeconfig for EKSClusterRole
       run: |
-        aws eks update-kubeconfig --region us-east-2 --name eks
+        aws eks update-kubeconfig --region us-east-2 --name EKSClusterRole
 
     - name: Deploy to Kubernetes
       run: |
