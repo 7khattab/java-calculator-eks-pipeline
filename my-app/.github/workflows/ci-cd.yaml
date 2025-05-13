@@ -1,0 +1,70 @@
+name: CI/CD Pipeline for Java App on AWS EKS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '17'
+
+    
+    - name: Run Unit Tests
+      run: mvn test
+
+    
+    - name: Run Integration Tests and Package
+      run: mvn clean package
+
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    
+
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v4
+      with:
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-java-app:latest
+
+    
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        region: us-east-2
+
+  
+    - name: Update kubeconfig for EKS
+      run: |
+        aws eks update-kubeconfig --region us-east-2 --name eks
+
+  
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f ./k8s/deployment.yaml
+        kubectl apply -f ./k8s/service.yaml
+
